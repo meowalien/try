@@ -61,6 +61,7 @@ func BenchmarkCallerStack_CallerStack_100_deap(b *testing.B) {
 
 func BenchmarkCallerStack_CallerStack_10000_deap(b *testing.B) {
 	for i := 0; i < b.N; i++ {
+		b.StopTimer()
 		CallerStack_target_deap(b, 0, 10000)
 	}
 }

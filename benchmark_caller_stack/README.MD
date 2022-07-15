@@ -1,1 +1,1 @@
-go test -v -bench=. -run=none -benchmem .
+go test -bench=. -run=none -benchmem .
