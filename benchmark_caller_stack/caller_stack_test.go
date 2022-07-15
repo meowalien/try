@@ -33,7 +33,7 @@ func CallerStack_do_nothing(b *testing.B, deap int, target int) {
 		b.StartTimer()
 		return
 	} else {
-		CallerStack_target_deap(b, deap+1, target)
+		CallerStack_do_nothing(b, deap+1, target)
 	}
 }
 
