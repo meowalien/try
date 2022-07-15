@@ -1,1 +1,1 @@
-go test -bench=. -run=none -benchmem .
+go test -bench=. -run=none -benchmem -benchtime 1000000x .
