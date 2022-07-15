@@ -31,7 +31,6 @@ func CallerStack_target_deap(b *testing.B, deap int, target int) {
 func CallerStack_do_nothing(b *testing.B, deap int, target int) {
 	if deap == target {
 		b.StartTimer()
-		RunFuncName()
 		return
 	} else {
 		CallerStack_target_deap(b, deap+1, target)
