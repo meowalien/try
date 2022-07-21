@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-func NewBufferRingFileReaderWriter(bf *bufferRingFile) io.Reader {
+func newBufferRingFileReaderWriter(bf *bufferRingFile) io.ReadWriter {
 	return &bufferRingFileReaderWriter{theFile: bf}
 }
 
@@ -21,10 +21,10 @@ func (b *bufferRingFileReaderWriter) ResetCursor() {
 func (b *bufferRingFileReaderWriter) Read(buf []byte) (done int, err error) {
 	total := len(buf)
 	for {
-		if b.theFile.outOfRange(b.theFile.pointerStart, b.theFile.pointerEnd, b.cursor) {
+		if b.outOfRange(b.theFile.pointerStart, b.theFile.pointerEnd, b.cursor) {
 			return done, io.EOF
 		}
-		doneN, err1 := b.theFile.copyRange(b.cursor, b.theFile.pointerEnd, buf)
+		doneN, err1 := b.copyRange(b.cursor, b.theFile.pointerEnd, buf)
 		if err1 != nil {
 			err = errs.WithLine(err1)
 			return
