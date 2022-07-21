@@ -35,7 +35,7 @@ func (b *bufferRingFileReaderWriter) Read(buf []byte) (done int, err error) {
 			return
 		}
 		done += doneN
-		b.theFile.theBufferRing.plusIndex(b.cursor, doneN+1)
+		b.cursor = b.theFile.theBufferRing.plusIndex(b.cursor, doneN+1)
 		if total == done {
 			return total, io.EOF
 		}
