@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"try/buffer_ring/queue"
+	queue2 "try/buffer_ring/planA/queue"
 )
 
 type Cap interface {
@@ -19,7 +19,7 @@ type Space interface {
 
 type Space5 [5]int
 
-func (s Space5) Less(other queue.SortableItem) bool {
+func (s Space5) Less(other queue2.SortableItem) bool {
 	return s.Cap() > other.(Space).Cap()
 }
 
@@ -33,7 +33,7 @@ func (s *Space5) Len() (ans int) {
 
 type Space10 [10]int
 
-func (s Space10) Less(other queue.SortableItem) bool {
+func (s Space10) Less(other queue2.SortableItem) bool {
 	return s.Cap() > other.(Space).Cap()
 }
 func (s Space10) Cap() (ans int) {
@@ -45,12 +45,12 @@ func (s *Space10) Len() (ans int) {
 }
 
 type BufferRing interface {
-	queue.Queue
+	queue2.Queue
 	Space
 }
 
 type bufferRing struct {
-	queue.PriorityQueue
+	queue2.PriorityQueue
 }
 
 func (p *bufferRing) Len() (ans int) {
