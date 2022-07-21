@@ -87,7 +87,7 @@ func (b bufferRing) plusIndex(oldPointer BudderRingPointer, plusIndex int) Budde
 	newPointer := oldPointer.Copy()
 	for {
 		currentArea := b.spaceArea[newPointer.Layer(1)]
-		remainingSpace := currentArea.Cap() - newPointer.Layer(2)
+		remainingSpace := currentArea.Len() - newPointer.Layer(2)
 		if remainingSpace >= plusIndex {
 			newPointer.LayerSet(2, newPointer.Layer(2)+plusIndex)
 			return newPointer

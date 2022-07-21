@@ -1,9 +1,10 @@
 package plainB
 
+// todo: change to [2]*int
 type BudderRingPointer [2]int
 
-func (b BudderRingPointer) MaxLayer() int {
-	return 2
+func (b BudderRingPointer) MaxLayer(i int) int {
+	return b[i]
 }
 func (b BudderRingPointer) Layer(i int) int {
 	return b[i]

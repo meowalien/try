@@ -89,7 +89,7 @@ func (b bufferRingFileReaderWriter) copyRange(start BudderRingPointer, end Budde
 		}
 		n++
 		return true
-	}
+	})
 }
 
 func (b *bufferRingFileReaderWriter) writeRange(cursor BudderRingPointer, end BudderRingPointer, buf []byte) (n int, err error) {
@@ -97,5 +97,5 @@ func (b *bufferRingFileReaderWriter) writeRange(cursor BudderRingPointer, end Bu
 }
 
 func (b *bufferRingFileReaderWriter) foreach(start BudderRingPointer, end BudderRingPointer, f func(layer1Index int, layer2Index int) bool) {
-	
+
 }
