@@ -90,12 +90,34 @@ func (b bufferRingFileReaderWriter) copyRange(start BudderRingPointer, end Budde
 		n++
 		return true
 	})
+	return
 }
 
-func (b *bufferRingFileReaderWriter) writeRange(cursor BudderRingPointer, end BudderRingPointer, buf []byte) (n int, err error) {
-
+func (b *bufferRingFileReaderWriter) writeRange(start BudderRingPointer, end BudderRingPointer, buf []byte) (n int, err error) {
+	if len(buf) == 0 {
+		err = io.EOF
+		return
+	}
+	b.foreach(start, end, func(layer1Index int, layer2Index int) bool {
+		err = b.theFile.theBufferRing.setByte(layer1Index, layer2Index, buf[n])
+		if err != nil {
+			if !errors.Is(err, io.EOF) {
+				err = errs.WithLine(err)
+			}
+			return false
+		}
+		if n == len(buf)-1 {
+			err = io.EOF
+			return false
+		}
+		n++
+		return true
+	})
+	return
 }
 
 func (b *bufferRingFileReaderWriter) foreach(start BudderRingPointer, end BudderRingPointer, f func(layer1Index int, layer2Index int) bool) {
+	if start.Layer(1) < end.Layer(1) {
 
+	}
 }

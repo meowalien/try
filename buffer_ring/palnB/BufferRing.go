@@ -105,6 +105,10 @@ func (b *bufferRing) getByte(index int, index2 int) (byte, error) {
 
 }
 
+func (b *bufferRing) setByte(index int, index2 int, b2 byte) error {
+
+}
+
 const DefaultBufferRingInitializationSpace = 10
 
 func NewBufferRing() BufferRing {
