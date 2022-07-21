@@ -71,7 +71,7 @@ func (b bufferRingFileReaderWriter) outOfRange(start BudderRingPointer, end Budd
 }
 
 func (b bufferRingFileReaderWriter) copyRange(start BudderRingPointer, end BudderRingPointer, buf []byte) (n int, err error) {
-	if cap(buf) == 0 {
+	if len(buf) == 0 {
 		err = io.EOF
 		return
 	}
@@ -83,7 +83,7 @@ func (b bufferRingFileReaderWriter) copyRange(start BudderRingPointer, end Budde
 			}
 			return false
 		}
-		if n == cap(buf)-1 {
+		if n == len(buf)-1 {
 			err = io.EOF
 			return false
 		}
