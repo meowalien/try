@@ -7,7 +7,9 @@ type Space interface {
 
 type BufferRing interface {
 	Space
-	NewFile(needSpace int) BufferRingFile
+	NewFile(needSpace int) *bufferRingFile
+	FreeSpace(start BudderRingPointer, end BudderRingPointer)
+	plusIndex(currentPointer BudderRingPointer, plusIndex int) BudderRingPointer
 }
 
 type bufferRing struct {
@@ -16,7 +18,12 @@ type bufferRing struct {
 	globalPointerEnd   BudderRingPointer
 }
 
-func (b *bufferRing) NewFile(needSpace int) BufferRingFile {
+func (b *bufferRing) FreeSpace(start BudderRingPointer, end BudderRingPointer) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (b *bufferRing) NewFile(needSpace int) *bufferRingFile {
 	if b.Len() < needSpace {
 		b.scaleUP(b.calculateNewScaleNeedToBeScaleUP(needSpace))
 	}
