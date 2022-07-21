@@ -12,7 +12,7 @@ type Abandonedable interface {
 }
 
 type bufferRingFile struct {
-	theBufferRing BufferRing
+	theBufferRing *bufferRing
 	pointerStart  BudderRingPointer
 	pointerEnd    BudderRingPointer
 }

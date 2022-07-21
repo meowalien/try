@@ -101,6 +101,10 @@ func (b bufferRing) plusIndex(oldPointer BudderRingPointer, plusIndex int) Budde
 	}
 }
 
+func (b *bufferRing) getByte(index int, index2 int) (byte, error) {
+
+}
+
 const DefaultBufferRingInitializationSpace = 10
 
 func NewBufferRing() BufferRing {

@@ -2,6 +2,7 @@ package plainB
 
 import (
 	"github.com/meowalien/go-meowalien-lib/errs"
+	"github.com/pkg/errors"
 	"io"
 )
 
@@ -26,7 +27,11 @@ func (b *bufferRingFileReaderWriter) Read(buf []byte) (done int, err error) {
 		}
 		doneN, err1 := b.copyRange(b.cursor, b.theFile.pointerEnd, buf)
 		if err1 != nil {
-			err = errs.WithLine(err1)
+			if errors.Is(err1, io.EOF) {
+				err = err1
+			} else {
+				err = errs.WithLine(err1)
+			}
 			return
 		}
 		done += doneN
@@ -65,14 +70,32 @@ func (b bufferRingFileReaderWriter) outOfRange(start BudderRingPointer, end Budd
 	}
 }
 
-func (b bufferRingFileReaderWriter) copyRange(cursor BudderRingPointer, end BudderRingPointer, buf []byte) (n int, err error) {
-	b.foreach(cursor, end, func(layer1Index int , layer2Index int ) (bool) {
-		if n >= cap(buf){
-
+func (b bufferRingFileReaderWriter) copyRange(start BudderRingPointer, end BudderRingPointer, buf []byte) (n int, err error) {
+	if cap(buf) == 0 {
+		err = io.EOF
+		return
+	}
+	b.foreach(start, end, func(layer1Index int, layer2Index int) bool {
+		buf[n], err = b.theFile.theBufferRing.getByte(layer1Index, layer2Index)
+		if err != nil {
+			if !errors.Is(err, io.EOF) {
+				err = errs.WithLine(err)
+			}
+			return false
 		}
+		if n == cap(buf)-1 {
+			err = io.EOF
+			return false
+		}
+		n++
+		return true
 	}
 }
 
 func (b *bufferRingFileReaderWriter) writeRange(cursor BudderRingPointer, end BudderRingPointer, buf []byte) (n int, err error) {
 
+}
+
+func (b *bufferRingFileReaderWriter) foreach(start BudderRingPointer, end BudderRingPointer, f func(layer1Index int, layer2Index int) bool) {
+	
 }
