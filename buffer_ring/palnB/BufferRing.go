@@ -83,19 +83,20 @@ func (b *bufferRing) occupySpace(space int) (pointerST BudderRingPointer, pointe
 }
 
 // no scaleUP
-func (b bufferRing) plusIndex(currentPointer BudderRingPointer, plusIndex int) BudderRingPointer {
+func (b bufferRing) plusIndex(oldPointer BudderRingPointer, plusIndex int) BudderRingPointer {
+	newPointer := oldPointer.Copy()
 	for {
-		currentArea := b.spaceArea[currentPointer.Layer(1)]
-		remainingSpace := currentArea.Cap() - currentPointer.Layer(2)
+		currentArea := b.spaceArea[newPointer.Layer(1)]
+		remainingSpace := currentArea.Cap() - newPointer.Layer(2)
 		if remainingSpace >= plusIndex {
-			currentPointer.LayerSet(2, currentPointer.Layer(2)+plusIndex)
-			return currentPointer
+			newPointer.LayerSet(2, newPointer.Layer(2)+plusIndex)
+			return newPointer
 		}
 		plusIndex -= remainingSpace
-		if currentPointer.Layer(1)+1 >= len(b.spaceArea) {
-			currentPointer.LayerSet(1, 0)
+		if newPointer.Layer(1)+1 >= len(b.spaceArea) {
+			newPointer.LayerSet(1, 0)
 		} else {
-			currentPointer.LayerAdd(1, 1)
+			newPointer.LayerAdd(1, 1)
 		}
 	}
 }
