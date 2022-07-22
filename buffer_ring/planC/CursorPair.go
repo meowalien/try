@@ -2,6 +2,8 @@ package planC
 
 type Cursor interface {
 	Plus(space int) Cursor
+	AreaID() bool
+	SpaceIndex() int
 }
 
 type cursor struct {

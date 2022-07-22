@@ -77,7 +77,7 @@ func (b *bufferRing) NewFile(needSpace int) File {
 	b.spaceRingLock.Lock()
 	defer b.spaceRingLock.Unlock()
 
-	if b.spaceRing.RemainingSpace() < needSpace {
+	if b.spaceRing.TotalRemainingSpace() < needSpace {
 		b.scaleUpRing(b.calculateNewScaleSizeToBeScaleUP(needSpace))
 	}
 	pair := b.occupySpace(needSpace)
@@ -111,7 +111,7 @@ func (b *bufferRing) occupySpace(space int) (cursorPair CursorPair) {
 
 // no lock
 func (b *bufferRing) scaleUpRing(needSpace int) {
-	b.spaceRing.insertSpaceBeforeStart(newSpace(needSpace))
+	b.spaceRing.insertSpaceBeforeCursor(b.globalCursorPair.GetStartCursor(), newSpace(needSpace))
 }
 
 func (b *bufferRing) calculateNewScaleSizeToBeScaleUP(space int) int {
@@ -121,7 +121,7 @@ func (b *bufferRing) calculateNewScaleSizeToBeScaleUP(space int) int {
 
 // no lock
 func (b *bufferRing) moveStartCursorToNotEmptySpace() {
-	notEmptySpaceCursor := b.spaceRing.findNotEmptySpace(b.globalCursorPair.GetStartCursor())
+	notEmptySpaceCursor := b.spaceRing.findNotEmptySpaceAfter(b.globalCursorPair.GetStartCursor())
 	b.globalCursorPair.SetStartCursor(notEmptySpaceCursor)
 }
 
