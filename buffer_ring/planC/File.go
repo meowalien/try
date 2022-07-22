@@ -15,35 +15,35 @@ type File interface {
 	getCursorPair() CursorPair
 }
 
-type file struct {
-	bufferRing BufferRing
+type file[T any] struct {
+	bufferRing BufferRing[T]
 	cursorPair CursorPair
 	fileReader io.Reader
 	fileWriter io.Writer
 	lock       sync.RWMutex
 }
 
-func (f *file) getCursorPair() CursorPair {
+func (f *file[T]) getCursorPair() CursorPair {
 	return f.cursorPair
 }
 
-func (f *file) Delete() {
+func (f *file[T]) Delete() {
 	f.bufferRing.DeleteFile(f)
 }
 
 // todo: if Reader been call first , make it as chan and replace fileWriter
-func (f *file) Reader() io.Reader {
+func (f *file[T]) Reader() io.Reader {
 	if f.fileReader != nil {
 		return f.fileReader
 	}
-	f.fileReader = &fileReadWriter{file: f, cursor: f.cursorPair.GetStartCursor()}
+	f.fileReader = &fileReadWriter[T]{file: f, cursor: f.cursorPair.GetStartCursor()}
 	return f.fileReader
 }
 
-func (f *file) Writer() io.Writer {
+func (f *file[T]) Writer() io.Writer {
 	if f.fileWriter != nil {
 		return f.fileWriter
 	}
-	f.fileWriter = &fileReadWriter{file: f, cursor: f.cursorPair.GetStartCursor()}
+	f.fileWriter = &fileReadWriter[T]{file: f, cursor: f.cursorPair.GetStartCursor()}
 	return f.fileWriter
 }

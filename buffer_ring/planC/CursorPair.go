@@ -2,17 +2,25 @@ package planC
 
 type Cursor interface {
 	Plus(space int) Cursor
-	AreaID() bool
+	AreaID() int
 	SpaceIndex() int
 }
 
-type cursor struct {
-	spaceRing  SpaceRing
+type cursor[T any] struct {
+	spaceRing  SpaceRing[T]
 	areaIndex  int
 	spaceIndex int
 }
 
-func (c cursor) Plus(spaceNeed int) Cursor {
+func (c cursor[T]) AreaID() int {
+	return c.areaIndex
+}
+
+func (c cursor[T]) SpaceIndex() int {
+	return c.spaceIndex
+}
+
+func (c cursor[T]) Plus(spaceNeed int) Cursor {
 	remainingSpace := c.spaceRing.getSpace(c.areaIndex).RemainingSpaceAfter(c.spaceIndex)
 	spaceNeed -= remainingSpace
 	if spaceNeed <= 0 {
@@ -24,8 +32,8 @@ func (c cursor) Plus(spaceNeed int) Cursor {
 	}
 }
 
-func newCursor(c SpaceRing, areaIndex int, spaceIndex int) Cursor {
-	return &cursor{spaceRing: c, areaIndex: areaIndex, spaceIndex: spaceIndex}
+func newCursor[T any](c SpaceRing[T], areaIndex int, spaceIndex int) Cursor {
+	return &cursor[T]{spaceRing: c, areaIndex: areaIndex, spaceIndex: spaceIndex}
 }
 
 type CursorPair interface {
@@ -35,30 +43,30 @@ type CursorPair interface {
 	SetEndCursor(cursor Cursor)
 }
 
-type cursorPair struct {
-	ring        SpaceRing
+type cursorPair[T any] struct {
+	ring        SpaceRing[T]
 	startCursor Cursor
 	endCursor   Cursor
 }
 
-func (c *cursorPair) GetStartCursor() Cursor {
+func (c *cursorPair[T]) GetStartCursor() Cursor {
 	return c.startCursor
 }
 
-func (c *cursorPair) GetEndCursor() Cursor {
+func (c *cursorPair[T]) GetEndCursor() Cursor {
 	return c.endCursor
 }
 
-func (c *cursorPair) SetStartCursor(cursor Cursor) {
+func (c *cursorPair[T]) SetStartCursor(cursor Cursor) {
 	c.startCursor = cursor
 }
 
-func (c *cursorPair) SetEndCursor(cursor Cursor) {
+func (c *cursorPair[T]) SetEndCursor(cursor Cursor) {
 	c.endCursor = cursor
 }
 
-func newCursorPair(ring SpaceRing) CursorPair {
-	c := &cursorPair{ring: ring}
+func newCursorPair[T any](ring SpaceRing[T]) CursorPair {
+	c := &cursorPair[T]{ring: ring}
 	c.startCursor = newCursor(ring, 0, 0)
 	c.endCursor = newCursor(ring, 0, 0)
 	return c

@@ -1,15 +1,15 @@
 package planC
 
-type SpaceRing interface {
-	insertSpaceBeforeCursor(cursor Cursor, space Space)
+type SpaceRing[T any] interface {
+	insertSpaceBeforeCursor(cursor Cursor, space Space[T])
 	TotalRemainingSpace() int
 	cleanUpSpaceInRange(pair CursorPair)
 	findNotEmptySpaceAfter(i Cursor) Cursor
-	getSpace(spaceID int) Space
+	getSpace(spaceID int) Space[T]
 	nextArea(spaceID int) int
-	forRangeSpace(writeCursor Cursor, nextCursor Cursor, f func(space Space, isEnd bool) bool)
+	forRangeSpace(writeCursor Cursor, nextCursor Cursor, f func(space Space[T], isEnd bool) bool)
 }
 
-func newSpaceRing(initialiseSpace ...Space) SpaceRing {
+func newSpaceRing[T any](initialiseSpace ...Space[T]) SpaceRing[T] {
 	return newSpaceLinkList(initialiseSpace...)
 }

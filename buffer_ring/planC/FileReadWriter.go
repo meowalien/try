@@ -6,12 +6,12 @@ import (
 	"io"
 )
 
-type fileReadWriter struct {
-	*file
+type fileReadWriter[T any] struct {
+	*file[T]
 	cursor Cursor
 }
 
-func (f *fileReadWriter) Read(p []byte) (n int, err error) {
+func (f *fileReadWriter[T]) Read(p []byte) (n int, err error) {
 	f.lock.RLock()
 	defer f.lock.RUnlock()
 	n, nextCursor, err := f.bufferRing.readBufferFrom(f.cursor, p)
@@ -26,7 +26,7 @@ func (f *fileReadWriter) Read(p []byte) (n int, err error) {
 	return
 }
 
-func (f *fileReadWriter) Write(p []byte) (n int, err error) {
+func (f *fileReadWriter[T]) Write(p []byte) (n int, err error) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 	n, nextCursor, err := f.bufferRing.writeBufferTo(f.cursor, p)

@@ -4,11 +4,11 @@ import "container/list"
 
 // todo: change firstElement if better
 
-type LinkListRing interface {
-	SpaceRing
+type LinkListRing[T any] interface {
+	SpaceRing[T]
 }
 
-func newSpaceLinkList(space ...Space) LinkListRing {
+func newSpaceLinkList[T any](space ...Space[T]) LinkListRing[T] {
 	if len(space) == 0 {
 		panic("spaceLinkList must have at least one space")
 	}
@@ -18,15 +18,16 @@ func newSpaceLinkList(space ...Space) LinkListRing {
 		l.PushBack(space[0])
 	}
 
-	return &spaceLinkList{rawList: l, firstElement: firstElement}
+	return &spaceLinkList[T]{rawList: l, firstElement: firstElement}
 }
 
-type spaceLinkList struct {
+type spaceLinkList[T any] struct {
+	// todo: change to ring link list
 	rawList      *list.List
 	firstElement *list.Element
 }
 
-func (r *spaceLinkList) insertSpaceBeforeCursor(cursor Cursor, space Space) {
+func (r *spaceLinkList[T]) insertSpaceBeforeCursor(cursor Cursor, space Space[T]) {
 	element, ok := r.findElementByCursor(r.firstElement, cursor)
 	if !ok {
 		panic("cursor not found")
@@ -34,9 +35,9 @@ func (r *spaceLinkList) insertSpaceBeforeCursor(cursor Cursor, space Space) {
 	r.rawList.InsertBefore(space, element)
 }
 
-func (r *spaceLinkList) findElementByCursor(startElement *list.Element, c Cursor) (elementFound *list.Element, ok bool) {
-	ok = r.foreachElementStartAt(startElement, func(element *list.Element) bool {
-		if elementFound.Value.(Space).AreaID() == c.AreaID() {
+func (r *spaceLinkList[T]) findElementByCursor(startElement *list.Element, c Cursor) (elementFound *list.Element, ok bool) {
+	ok = r.foreachElement(startElement, func(element *list.Element) bool {
+		if elementFound.Value.(Space[T]).AreaID() == c.AreaID() {
 			elementFound = element
 			return false
 		}
@@ -45,15 +46,15 @@ func (r *spaceLinkList) findElementByCursor(startElement *list.Element, c Cursor
 	return
 }
 
-func (r *spaceLinkList) TotalRemainingSpace() (total int) {
-	_ = r.foreachElementStartAt(r.firstElement, func(element *list.Element) bool {
-		total += element.Value.(Space).RemainingSpace()
+func (r *spaceLinkList[T]) TotalRemainingSpace() (total int) {
+	_ = r.foreachElement(r.firstElement, func(element *list.Element) bool {
+		total += element.Value.(Space[T]).RemainingSpace()
 		return true
 	})
 	return
 }
 
-func (r *spaceLinkList) cleanUpSpaceInRange(pair CursorPair) {
+func (r *spaceLinkList[T]) cleanUpSpaceInRange(pair CursorPair) {
 	cursorStart := pair.GetStartCursor()
 	cursorEnd := pair.GetStartCursor()
 	elementStart, ok := r.findElementByCursor(r.firstElement, cursorStart)
@@ -62,7 +63,7 @@ func (r *spaceLinkList) cleanUpSpaceInRange(pair CursorPair) {
 	}
 
 	if cursorStart.AreaID() == cursorEnd.AreaID() {
-		theSpace := elementStart.Value.(Space)
+		theSpace := elementStart.Value.(Space[T])
 		isEmpty := theSpace.CleanUpRange(cursorStart.SpaceIndex(), cursorEnd.SpaceIndex())
 		if isEmpty {
 			r.rawList.Remove(elementStart)
@@ -74,11 +75,11 @@ func (r *spaceLinkList) cleanUpSpaceInRange(pair CursorPair) {
 		if !ok {
 			panic("cursor not found")
 		}
-		_ = r.foreachElementStartAt(elementStart, func(element *list.Element) (next bool) {
+		_ = r.foreachElement(elementStart, func(element *list.Element) (next bool) {
 			if element == elementEnd {
 				return
 			}
-			theSpace := element.Value.(Space)
+			theSpace := element.Value.(Space[T])
 			var cleanUpStart int
 			var cleanUpEnd int
 			next = true
@@ -99,25 +100,72 @@ func (r *spaceLinkList) cleanUpSpaceInRange(pair CursorPair) {
 	return
 }
 
-func (r *spaceLinkList) findNotEmptySpaceAfter(i Cursor) Cursor {
-
+func (r *spaceLinkList[T]) findNotEmptySpaceAfter(i Cursor) Cursor {
+	theElement, ok := r.findElementByCursor(r.firstElement, i)
+	if !ok {
+		panic("cursor not found")
+	}
+	var foundElement *list.Element
+	_ = r.foreachElement(theElement, func(element *list.Element) bool {
+		if !element.Value.(Space[T]).IsFree() {
+			foundElement = element
+			return false
+		}
+		return true
+	})
+	if foundElement == theElement {
+		return i
+	} else {
+		// todo: move to space 0 will waste some memory
+		return newCursor[T](r, foundElement.Value.(Space[T]).AreaID(), 0)
+	}
 }
 
 // get Space at input index of area
-func (r *spaceLinkList) getSpace(index int) Space {
-
+func (r *spaceLinkList[T]) getSpace(index int) (theSpace Space[T]) {
+	ok := r.foreachElement(r.firstElement, func(element *list.Element) bool {
+		if theSpace = element.Value.(Space[T]); theSpace.AreaID() == index {
+			return false
+		}
+		return true
+	})
+	if !ok {
+		panic("area not found")
+	}
+	return
 }
 
-func (r *spaceLinkList) nextArea(index int) int {
-
+func (r *spaceLinkList[T]) nextArea(index int) int {
+	var theElement *list.Element
+	ok := r.foreachElement(r.firstElement, func(element *list.Element) bool {
+		if theElement = element; theElement.Value.(Space[T]).AreaID() == index {
+			return false
+		}
+		return true
+	})
+	if !ok {
+		panic("area not found")
+	}
+	return theElement.Next().Value.(Space[T]).AreaID()
 }
 
-func (r *spaceLinkList) forRangeSpace(writeCursor Cursor, nextCursor Cursor, f func(space Space, isEnd bool) bool) {
-
+func (r *spaceLinkList[T]) forRangeSpace(start Cursor, end Cursor, f func(space Space[T], isEnd bool) bool) {
+	elementStart, ok := r.findElementByCursor(r.firstElement, start)
+	if !ok {
+		panic("cursor not found")
+	}
+	elementEnd, ok := r.findElementByCursor(elementStart, end)
+	if !ok {
+		panic("cursor not found")
+	}
+	_ = r.foreachElement(elementStart, func(element *list.Element) (next bool) {
+		next = f(element.Value.(Space[T]), element == elementEnd)
+		return
+	})
 }
 
 // return if find
-func (r *spaceLinkList) foreachElementStartAt(startElement *list.Element, f func(element *list.Element) bool) bool {
+func (r *spaceLinkList[T]) foreachElement(startElement *list.Element, f func(element *list.Element) bool) bool {
 	ele := startElement
 	if ele == nil {
 		return false
@@ -134,8 +182,4 @@ func (r *spaceLinkList) foreachElementStartAt(startElement *list.Element, f func
 			return true
 		}
 	}
-}
-
-func (r *spaceLinkList) forRangeElement(start Cursor, end Cursor, f func(space *list.Element, isEnd bool) bool) {
-
 }
