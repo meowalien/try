@@ -8,7 +8,7 @@ import (
 )
 
 func TestRingBuffer(t *testing.T) {
-	br := NewBufferRing()
+	br := NewBufferRing[byte]()
 	fileA := br.NewFile(10)
 
 	dataA := []byte("Hello")

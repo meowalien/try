@@ -1,25 +1,30 @@
 package planC
 
 import (
-	"io"
 	"sync"
 )
 
 type Deletable interface {
 	Delete()
 }
-type File interface {
+type Reader[T any] interface {
+	Read(p []T) (n int, err error)
+}
+type Writer[T any] interface {
+	Write(p []T) (n int, err error)
+}
+type File[T any] interface {
 	Deletable
-	Reader() io.Reader
-	Writer() io.Writer
+	Reader() Reader[T]
+	Writer() Writer[T]
 	getCursorPair() CursorPair
 }
 
 type file[T any] struct {
 	bufferRing BufferRing[T]
 	cursorPair CursorPair
-	fileReader io.Reader
-	fileWriter io.Writer
+	fileReader Reader[T]
+	fileWriter Writer[T]
 	lock       sync.RWMutex
 }
 
@@ -32,7 +37,7 @@ func (f *file[T]) Delete() {
 }
 
 // todo: if Reader been call first , make it as chan and replace fileWriter
-func (f *file[T]) Reader() io.Reader {
+func (f *file[T]) Reader() Reader[T] {
 	if f.fileReader != nil {
 		return f.fileReader
 	}
@@ -40,7 +45,7 @@ func (f *file[T]) Reader() io.Reader {
 	return f.fileReader
 }
 
-func (f *file[T]) Writer() io.Writer {
+func (f *file[T]) Writer() Writer[T] {
 	if f.fileWriter != nil {
 		return f.fileWriter
 	}

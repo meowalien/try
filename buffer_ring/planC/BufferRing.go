@@ -8,8 +8,8 @@ import (
 )
 
 type BufferRing[T any] interface {
-	NewFile(i int) File
-	DeleteFile(f File)
+	NewFile(i int) File[T]
+	DeleteFile(f File[T])
 	readBufferFrom(startAt Cursor, p []T) (n int, nextCursor Cursor, err error)
 	writeBufferTo(startAt Cursor, p []T) (n int, nextCursor Cursor, err error)
 }
@@ -73,7 +73,7 @@ func (b *bufferRing[T]) readBufferFrom(startAt Cursor, p []T) (n int, nextCursor
 }
 
 // lock
-func (b *bufferRing[T]) NewFile(needSpace int) File {
+func (b *bufferRing[T]) NewFile(needSpace int) File[T] {
 	b.spaceRingLock.Lock()
 	defer b.spaceRingLock.Unlock()
 
@@ -85,7 +85,7 @@ func (b *bufferRing[T]) NewFile(needSpace int) File {
 }
 
 // lock
-func (b *bufferRing[T]) DeleteFile(f File) {
+func (b *bufferRing[T]) DeleteFile(f File[T]) {
 	fileCursorPair := f.getCursorPair()
 	b.spaceRing.cleanUpSpaceInRange(fileCursorPair)
 	if b.globalCursorPair.GetStartCursor() == fileCursorPair.GetStartCursor() {
