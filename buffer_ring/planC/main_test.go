@@ -12,7 +12,7 @@ func TestRingBuffer(t *testing.T) {
 	fileA := br.NewFile(10)
 
 	dataA := []byte("Hello")
-	fileAReaderWriter := fileA.NewReadWriter()
+	fileAReaderWriter := fileA.Writer()
 	n, err := fileAReaderWriter.Write(dataA)
 	if err != nil {
 		panic(err)
@@ -20,7 +20,7 @@ func TestRingBuffer(t *testing.T) {
 	fmt.Println("Write n: ", n)
 
 	var dataB []byte
-	n1, err := io.Copy(bytes.NewBuffer(dataB), fileAReaderWriter)
+	n1, err := io.Copy(bytes.NewBuffer(dataB), fileA.Reader())
 	if err != nil {
 		panic(err)
 	}

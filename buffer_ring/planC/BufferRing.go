@@ -1,18 +1,75 @@
 package planC
 
 import (
+	"github.com/meowalien/go-meowalien-lib/errs"
+	"github.com/pkg/errors"
+	"io"
 	"sync"
 )
 
 type BufferRing interface {
 	NewFile(i int) File
 	DeleteFile(f File)
+	readBufferFrom(startAt Cursor, p []byte) (n int, nextCursor Cursor, err error)
+	writeBufferTo(startAt Cursor, p []byte) (n int, nextCursor Cursor, err error)
 }
 
 type bufferRing struct {
 	spaceRing        SpaceRing
 	globalCursorPair CursorPair
 	spaceRingLock    sync.RWMutex
+}
+
+func (b *bufferRing) writeBufferTo(startAt Cursor, p []byte) (n int, nextCursor Cursor, err error) {
+	total := len(p)
+	b.spaceRing.forRangeSpace(startAt, nextCursor, func(space Space, isEnd bool) bool {
+		var s []byte
+		if isEnd {
+			s = p[:total+1]
+		} else {
+			s = p
+		}
+		var written int
+		written, err = space.WriteToBuff(s)
+		total -= written
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return false
+			}
+			err = errs.WithLine(err)
+			return false
+		}
+		return false
+	})
+	nextCursor = startAt.Plus(total + 1)
+	n = len(p) - total
+	return
+}
+
+func (b *bufferRing) readBufferFrom(startAt Cursor, p []byte) (n int, nextCursor Cursor, err error) {
+	total := len(p)
+	b.spaceRing.forRangeSpace(startAt, nextCursor, func(space Space, isEnd bool) bool {
+		var s []byte
+		if isEnd {
+			s = p[:total+1]
+		} else {
+			s = p
+		}
+		var read int
+		read, err = space.ReadToBuff(s)
+		total -= read
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return false
+			}
+			err = errs.WithLine(err)
+			return false
+		}
+		return false
+	})
+	nextCursor = startAt.Plus(total + 1)
+	n = len(p) - total
+	return
 }
 
 // lock
@@ -23,8 +80,8 @@ func (b *bufferRing) NewFile(needSpace int) File {
 	if b.spaceRing.RemainingSpace() < needSpace {
 		b.scaleUpRing(b.calculateNewScaleSizeToBeScaleUP(needSpace))
 	}
-	cursorPair := b.occupySpace(needSpace)
-	return &file{cursorPair: cursorPair, bufferRing: b}
+	pair := b.occupySpace(needSpace)
+	return &file{cursorPair: pair, bufferRing: b}
 }
 
 // lock
@@ -72,9 +129,9 @@ const DefaultSpaceSize int = 10
 
 func NewBufferRing() BufferRing {
 	spaceRing := newSpaceRing(newSpace(DefaultSpaceSize))
-	cursorPair := newCursorPair(spaceRing)
+	pair := newCursorPair(spaceRing)
 	return &bufferRing{
 		spaceRing:        spaceRing,
-		globalCursorPair: cursorPair,
+		globalCursorPair: pair,
 	}
 }

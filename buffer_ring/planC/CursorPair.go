@@ -17,11 +17,9 @@ func (c cursor) Plus(spaceNeed int) Cursor {
 		return newCursor(c.spaceRing, c.areaIndex, c.spaceIndex+spaceNeed+remainingSpace)
 	} else {
 		c.areaIndex = c.spaceRing.nextArea(c.areaIndex)
-		//c.areaIndex++ /////
 		c.spaceIndex = 0
 		return c.Plus(spaceNeed)
 	}
-
 }
 
 func newCursor(c SpaceRing, areaIndex int, spaceIndex int) Cursor {
@@ -32,7 +30,7 @@ type CursorPair interface {
 	GetStartCursor() Cursor
 	GetEndCursor() Cursor
 	SetStartCursor(cursor Cursor)
-	SetEndCursor(push Cursor)
+	SetEndCursor(cursor Cursor)
 }
 
 type cursorPair struct {
@@ -41,24 +39,20 @@ type cursorPair struct {
 	endCursor   Cursor
 }
 
-func (c cursorPair) GetStartCursor() Cursor {
-	//TODO implement me
-	panic("implement me")
+func (c *cursorPair) GetStartCursor() Cursor {
+	return c.startCursor
 }
 
-func (c cursorPair) GetEndCursor() Cursor {
-	//TODO implement me
-	panic("implement me")
+func (c *cursorPair) GetEndCursor() Cursor {
+	return c.endCursor
 }
 
-func (c cursorPair) SetStartCursor(cursor Cursor) {
-	//TODO implement me
-	panic("implement me")
+func (c *cursorPair) SetStartCursor(cursor Cursor) {
+	c.startCursor = cursor
 }
 
-func (c cursorPair) SetEndCursor(push Cursor) {
-	//TODO implement me
-	panic("implement me")
+func (c *cursorPair) SetEndCursor(cursor Cursor) {
+	c.endCursor = cursor
 }
 
 func newCursorPair(ring SpaceRing) CursorPair {

@@ -3,6 +3,9 @@ package planC
 type Space interface {
 	RemainingSpace() int
 	RemainingSpaceAfter(index int) int
+	Write(s []byte) (int, error)
+	WriteToBuff(s []byte) (int, error)
+	ReadToBuff(s []byte) (int, error)
 }
 
 // use pool
@@ -34,6 +37,10 @@ func (r SpaceRing) getSpace(index int) Space {
 }
 
 func (r SpaceRing) nextArea(index int) int {
+
+}
+
+func (r SpaceRing) forRangeSpace(writeCursor Cursor, nextCursor Cursor, f func(space Space, isEnd bool) bool) {
 
 }
 
