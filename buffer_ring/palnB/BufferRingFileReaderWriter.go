@@ -59,7 +59,6 @@ func (b *bufferRingFileReaderWriter) Write(buf []byte) (done int, err error) {
 			return total, io.EOF
 		}
 	}
-
 }
 
 func (b bufferRingFileReaderWriter) outOfRange(start BudderRingPointer, end BudderRingPointer, cursor BudderRingPointer) bool {
@@ -115,9 +114,27 @@ func (b *bufferRingFileReaderWriter) writeRange(start BudderRingPointer, end Bud
 	})
 	return
 }
+func (b *bufferRingFileReaderWriter) loop(i, st, ed int, f func(layer1Index int, layer2Index int) bool) {
+	for j := st; j <= ed; j++ {
+		if !f(i, j) {
+			return
+		}
+	}
+}
 
 func (b *bufferRingFileReaderWriter) foreach(start BudderRingPointer, end BudderRingPointer, f func(layer1Index int, layer2Index int) bool) {
-	if start.Layer(1) < end.Layer(1) {
+	latestArea := end.Layer(1)
+	firstArea := start.Layer(1)
+	firstAreaSpace := start.Layer(2)
+	latestAreaSpace := end.Layer(2)
 
+	for i := firstArea; i <= latestArea; i++ {
+		if i == latestArea {
+			b.loop(i, 0, latestAreaSpace, f)
+		} else if i == firstArea {
+			b.loop(i, firstAreaSpace, b.theFile.theBufferRing.spaceArea[i].Len()-1, f)
+		} else {
+			b.loop(i, 0, b.theFile.theBufferRing.spaceArea[i].Len()-1, f)
+		}
 	}
 }

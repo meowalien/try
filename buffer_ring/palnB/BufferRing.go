@@ -19,8 +19,29 @@ type bufferRing struct {
 }
 
 func (b *bufferRing) FreeSpace(start BudderRingPointer, end BudderRingPointer) {
-	//TODO implement me
-	panic("implement me")
+	freeStart := start.Layer(1)
+	freeEnd := end.Layer(1)
+	spaceDiffer := freeEnd - freeStart
+
+	if spaceDiffer == 0 {
+		// don't need to do wipe datas
+		return
+	} else if spaceDiffer >= 2 {
+		st := freeStart + 1
+		ed := freeEnd - 1
+		b.cutOffSpace(st, ed)
+	} else {
+		st := freeStart + 1
+		ed := len(b.spaceArea) - 1
+		b.cutOffSpace(st, ed)
+		b.cutOffSpace(0, freeEnd-1)
+		//for i := freeStart + 1; i < len(b.spaceArea); i++ {
+		//	b.takeOffSpace(i)
+		//}
+		//for i := 0; i < freeEnd; i++ {
+		//	b.takeOffSpace(i)
+		//}
+	}
 }
 
 func (b *bufferRing) NewFile(needSpace int) *bufferRingFile {
@@ -74,6 +95,12 @@ func (b *bufferRing) scaleUP(need int) {
 	b.spaceArea = newSpace
 }
 
+func (b *bufferRing) cutOffSpace(st int, ed int) {
+	//cutOffCount := ed - st + 1
+	//newSpace := make([]Space, 0, len(b.spaceArea)-cutOffCount)
+	panic("implement me")
+}
+
 // no scaleUP
 func (b *bufferRing) occupySpace(space int) (pointerST BudderRingPointer, pointerED BudderRingPointer) {
 	pointerST = b.plusIndex(b.globalPointerEnd, 1)
@@ -102,11 +129,11 @@ func (b bufferRing) plusIndex(oldPointer BudderRingPointer, plusIndex int) Budde
 }
 
 func (b *bufferRing) getByte(index int, index2 int) (byte, error) {
-
+	panic("implement me")
 }
 
 func (b *bufferRing) setByte(index int, index2 int, b2 byte) error {
-
+	panic("implement me")
 }
 
 const DefaultBufferRingInitializationSpace = 10

@@ -4,11 +4,11 @@ import "io"
 
 type BufferRingFile interface {
 	Abandonedable
-	NewReaderWriter() io.ReadWriter
+	NewReadWriter() io.ReadWriter
 }
 
 type Abandonedable interface {
-	Abandoned()
+	Delete()
 }
 
 type bufferRingFile struct {
@@ -17,10 +17,10 @@ type bufferRingFile struct {
 	pointerEnd    BudderRingPointer
 }
 
-func (b *bufferRingFile) Abandoned() {
+func (b *bufferRingFile) Delete() {
 	b.theBufferRing.FreeSpace(b.pointerStart, b.pointerEnd)
 }
 
-func (b *bufferRingFile) NewReaderWriter() io.ReadWriter {
+func (b *bufferRingFile) NewReadWriter() io.ReadWriter {
 	return newBufferRingFileReaderWriter(b)
 }

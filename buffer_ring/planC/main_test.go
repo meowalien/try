@@ -1,4 +1,4 @@
-package plainB
+package planC
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestBufferRing(t *testing.T) {
+func TestRingBuffer(t *testing.T) {
 	br := NewBufferRing()
 	fileA := br.NewFile(10)
 
@@ -27,19 +27,5 @@ func TestBufferRing(t *testing.T) {
 	fmt.Println("Read n: ", n1)
 
 	fmt.Println("dataB: ", string(dataB))
-}
 
-//type SSS[T int | string] []T
-//
-//type MyStruct[T IIIII] struct {
-//	Name T
-//}
-//
-//type IIIII interface {
-//	int | string
-//	FFF()
-//}
-//
-//func Add[T ~int | ~float32](a, b T) T {
-//	return a + b
-//}
+}
